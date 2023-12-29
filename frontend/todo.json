@@ -1,0 +1,51 @@
+[
+    {
+        "action":"Não pode ser levado em conta o número de imóveis gost.",
+        "erro":true,
+        "do":""
+    },
+    {
+        "action":"Remover construção.",
+        "erro":"",
+        "do":""
+    },
+    {
+        "action":"Corrigir o id no desmebramento. Não está sendo salvo o id no desmembramento com construção.",
+        "erro":true,
+        "do":""
+    },
+
+    {
+        "action":"informar quais são os imoveis que estão sendo unido.",
+        "do":""
+    },
+    {
+        "action":"Cacelar o desmembramento.",
+        "do":""
+    },
+    {
+        "action":"Corrigir os botões da tela de blockdraw. Os botões precisam estar habilitados e deshabilitados de acordo com o contexto.",
+        "do":"+R,"
+    },
+    {
+        "action":"Corrigir a validação do número da residência de uma união ou partição. Não considerar na validação os números que estão sendo unidos ou desmembrados.",
+        "do":""
+    },
+    {
+        "action":"Adicionar o cometário nos imóveis de condomínios",
+        "do":""
+    },
+    {
+        "action":"Implementar o remembramento em imóveis de condomínios. O remembramento pode ser implementado mediante a seleção dos imóveis. Um botão de remembrar geral de ver adicionado.",        
+        "do":""
+    },
+    {
+        "action":"Implementar o desmebramento para os condominios. Um botão de desmebrar dever ser adicionado assim como é no imóvel de rua pública.",
+        "do":""
+    },
+    {
+        "action":"Implementar o log de atividades",
+        "do":""
+    }
+
+]

@@ -1,0 +1,20 @@
+person->[physical_person,legal_person]
+person:{
+    address,
+
+}
+property:{
+    address
+}
+
+public_place:{
+    name,
+    id, //cep
+    list_key_filter,
+}
+
+address:
+{
+    public_place,
+    *number
+}
