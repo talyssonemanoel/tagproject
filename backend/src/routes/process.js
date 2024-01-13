@@ -33,6 +33,39 @@ router.put('/', async (req, res) => {
   res.status(200).send(result[0]);
 })
 
+router.put('/submitPhase', async (req, res) => {
+  let data = req.body;
+
+  let result = await db.query(`
+    LET process = DOCUMENT(${colName}, @_key)
+    UPDATE process WITH { currentPhase: @accept ? (process.currentPhase < 3 ? process.currentPhase + 1 : process.currentPhase) : (process.currentPhase > 0 ? process.currentPhase - 1 : process.currentPhase) } IN ${colName}
+    LET n = NEW 
+    RETURN n
+  `, { _key: data._key, accept: data.accept});
+
+  result = await result.all();
+
+  res.status(200).send(result[0]);
+})
+
+
+router.put('/add-obs', async (req, res) => {
+  let data = req.body;
+
+  let result = await db.query(`
+    LET doc = DOCUMENT(${colName}, @_key)
+    LET updatedPhase = MERGE(doc.listPhase[doc.currentPhase], { obs: @obs })
+    UPDATE doc WITH { listPhase: doc.listPhase[* RETURN CURRENT == doc.listPhase[doc.currentPhase] ? updatedPhase : CURRENT] } IN ${colName}
+    LET n = NEW 
+    RETURN n
+  `, { _key: data._key, obs: data.obs });
+
+  result = await result.all();
+
+  res.status(200).send(result[0]);
+})
+
+
 router.get('/', async (req, res) => {
 
   const cursor = await db.query(`
@@ -41,6 +74,26 @@ router.get('/', async (req, res) => {
   res.status(200).send(await cursor.all());
 
 })
+
+router.get('/fetch-documents', async (req, res) => {
+  try {
+    const _key = req.query._key;
+    
+    let result = await db.query(`
+        LET doc = DOCUMENT(${colName}, @_key)
+        RETURN doc.listPhase[0].listClassDocument
+    `, { _key: _key });
+
+    result = await result.all();
+    
+    res.status(200).json(result[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Ocorreu um erro ao buscar os documentos.' });
+  }
+});
+
+
 
 router.get('/name', async (req, res) => {
 
@@ -318,14 +371,19 @@ router.put('/attach-documents', async (req, res) => {
     // Convertendo o buffer para base64
     const base64File = fileBuffer.toString('base64');
 
-    let result = await db.query(`
-      LET doc = DOCUMENT(${colName}, @_key)
-      UPDATE doc WITH { attachmentPhase: { listClassDocument: PUSH(doc.attachmentPhase.listClassDocument, @base64File) } } IN ${colName}
-      LET n = NEW 
-      RETURN n
-    `, { _key: _key, base64File: base64File });
+    // Buscar o documento
+    let doc = await db.collection(colName).document(_key);
 
-    result = await result.all();
+    // Encontrar o índice da fase de anexo
+    let phaseIndex = 0;
+
+    // Atualizar a lista de documentos da fase de anexo
+    if (phaseIndex !== -1) {
+      doc.listPhase[0].listClassDocument.push(base64File);
+    }
+
+    // Atualizar o documento inteiro
+    let result = await db.collection(colName).update(_key, doc);
 
     res.status(200).json({ message: 'Documento anexado com sucesso!' });
   } catch (error) {
@@ -334,31 +392,33 @@ router.put('/attach-documents', async (req, res) => {
   }
 });
 
-router.get('/fetch-documents', async (req, res) => {
-  try {
-      const _key = req.query._key;
-      
-      let result = await db.query(`
-          LET doc = DOCUMENT(${colName}, @_key)
-          RETURN doc.attachmentPhase.listClassDocument
-      `, { _key: _key });
 
-      result = await result.all();
-      
-      res.status(200).json(result);
+
+router.put('/clear-documents', async (req, res) => {
+  try {
+    const _key = '4911637'
+
+    // Buscar o documento
+    let doc = await db.collection(colName).document(_key);
+
+  
+
+    // Encontrar o índice da fase de anexo
+    //let phaseIndex = 0
+
+    // Limpar a lista de documentos da fase de anexo
+    //if (phaseIndex !== -1) {
+      doc.listPhase[0].listClassDocument = [];
+   //}
+
+    // Atualizar o documento inteiro
+    let result = await db.collection(colName).update(_key, doc);
+
+    res.status(200).json({ message: 'Documentos removidos com sucesso!' });
   } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Ocorreu um erro ao buscar os documentos.' });
+    console.error(error);
+    res.status(500).json({ message: 'Ocorreu um erro ao remover os documentos.' });
   }
 });
-
-
-
-
-
-
-
-
-
 
 module.exports = router;

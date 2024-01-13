@@ -3,7 +3,8 @@ export default class {
         this.params = params;
         this.user = {
             structTag: "",
-            role: "strategic"
+            role: "strategic",
+            cargo: "attachmentPhase"
         }
     }
 

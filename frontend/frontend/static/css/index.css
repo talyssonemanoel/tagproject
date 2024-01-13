@@ -43,3 +43,8 @@ a {
     border-style: solid!important;
     border-color: red!important;
 }
+
+.timeline-block {
+    size: 50px;
+    background-color: blue;
+}

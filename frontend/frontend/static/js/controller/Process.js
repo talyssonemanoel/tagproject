@@ -181,7 +181,7 @@ async function moveProcess(_keyProcess) {
 }
 
 
-async function AttachDocuments(_key) {
+async function AttachDocuments(doc) {
     return (`
     
         <div class="card mb-3">
@@ -189,9 +189,7 @@ async function AttachDocuments(_key) {
                 <div>Documentação</div>
             </div>
             <div class="card-body">
-                <div class="input-group mb-3">
-                    <input type="file" class="form-control" id="inputGroupFile01">
-                </div>
+                <div id="list_doc"></div>
             </div>
         </div>
         <div class="card">
@@ -199,35 +197,61 @@ async function AttachDocuments(_key) {
                 <div>Observações</div>
             </div>
             <div class="card-body">
-                <div class="form-floating">
-                    <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea2" style="height: 100px"></textarea>
-                    <label for="floatingTextarea2">Comentários</label>
-                </div>
+                <a>${doc.listPhase[0].obs}</a>
             </div>
         </div>
-        <button aof-view class="btn btn-primary button-add-service h-100" onclick='SaveDocuments("9096141")'>Salvar doc</button>
-
     `)
 }
 
 async function SaveDocuments(_key) {
-    console.log(document.getElementById("inputGroupFile01").files[0])
     let data = new FormData();
     data.append('_key', _key);
     data.append('file', document.getElementById("inputGroupFile01").files[0]);
-    
 
-    fetch('http://localhost:3001/process/attach-documents', {
-        method: 'PUT',
-        body: data
-    })
-        .then(response => response.json())
-        .then(data => console.log(data))
-        .catch(error => console.error(error));
+    try {
+        let response = await fetch('http://localhost:3001/process/attach-documents', {
+            method: 'PUT',
+            body: data
+        });
+
+        let responseData = await response.json();
+        console.log(responseData);
+    } catch (error) {
+        console.error(error);
+    }
 }
 
 
-async function opinionPhase() {
+
+async function FetchAndDisplayDocuments(_key) {
+    fetch(`http://localhost:3001/process/fetch-documents?_key=${_key}`)
+    .then(response => response.json())
+    .then(data => {
+        let listDoc = document.getElementById('list_doc');
+        data.forEach((base64String, index) => {
+            let binaryString = window.atob(base64String);
+            let len = binaryString.length;
+            let bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            let blob = new Blob([bytes.buffer]);
+            let url = window.URL.createObjectURL(blob);
+            let link = document.createElement('a');
+            link.href = url;
+            link.download = `document${index + 1}.pdf`; // Substitua '.pdf' pelo tipo de arquivo correto
+            link.textContent = `Download Document ${index + 1}`;
+            listDoc.appendChild(link);
+            // Adicione uma quebra de linha após cada link, se desejar
+            //listDoc.appendChild(document.createElement('br'));
+        });
+    });
+}
+
+
+
+
+async function opinionPhase(doc) {
     return (`
     <div class="card">
         <div class="card-header">
@@ -235,8 +259,7 @@ async function opinionPhase() {
         </div>
         <div class="card-body">
             <div class="form-floating">
-                <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea2" style="height: 100px"></textarea>
-                <label for="floatingTextarea2">Comentários</label>
+                <a>${doc.listPhase[1].obs}</a>
             </div>
         </div>
     </div>
@@ -244,7 +267,7 @@ async function opinionPhase() {
 
 }
 
-async function decisionPhase() {
+async function decisionPhase(doc) {
     return (`
     <div class="card">
             <div class="card-header">
@@ -252,15 +275,14 @@ async function decisionPhase() {
             </div>
             <div class="card-body">
                 <div class="form-floating">
-                    <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea2" style="height: 100px"></textarea>
-                    <label for="floatingTextarea2">Comentários</label>
+                    <a>${doc.listPhase[2].obs}</a>
                 </div>
             </div>
         </div>
     `)
 }
 
-async function implementationPhase() {
+async function implementationPhase(doc) {
     return (`
     <div class="card">
             <div class="card-header">
@@ -268,12 +290,190 @@ async function implementationPhase() {
             </div>
             <div class="card-body">
                 <div class="form-floating">
-                    <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea2" style="height: 100px"></textarea>
-                    <label for="floatingTextarea2">Comentários</label>
+                    <a>${doc.listPhase[3].obs}</a>
                 </div>
             </div>
         </div>
     `)
+}
+
+
+async function RenderTimeline(doc, currentPhaseView, cargo) {
+    let row = `
+        <style>
+            .container-tl {
+                font-size: xx-small!important;
+            }
+            .container-nb {
+                font-size: xx-large!important;
+            }
+            .col-tl {
+                width: 70px!important;
+                height: 65px!important;
+                padding: 0!important;
+                box-sizing: border-box;
+            }
+            .line-tl {
+                width: 50px;
+                height: 1px;
+                background: var(--bs-primary);
+            }
+        </style>
+        
+        <div class="d-flex text-center mb-3 justify-content-center align-items-center">`;
+
+    for (let i = 0; i < doc.listPhase.length; i++) {
+        //let phaseKey = Object.keys(doc.listPhase[i])[0]; // Pega a chave da fase
+        let phaseNames = [
+            "Documentação",
+            "Opinião",
+            "Decisão",
+            "Implementação"
+        ];
+        let phaseName = phaseNames[i]; // Pega o nome da fase do objeto phaseNames
+
+        // Determina a classe do botão com base no índice da fase atual
+        let buttonClass = i === currentPhaseView ? "btn btn-primary" : "btn btn-outline-primary";
+
+        // Adiciona o atributo disabled se o índice for maior que indexPhase
+        let disabled = i > doc.currentPhase ? "disabled" : "";
+
+        row += `
+            <button type="button" class="col-tl ${buttonClass} d-flex flex-column justify-content-between" ${disabled} data-doc='${JSON.stringify(doc)}' onclick="(function() { RerenderTimeline(JSON.parse(this.getAttribute('data-doc')), ${i}, '${cargo}'); }).call(this);">
+                <div class="d-flex row container-tl">
+                    <div class="container-nb align-self-center">${i + 1}</div>         
+                    <div class="container-tl align-self-end">${phaseName}</div>
+                </div>
+            </button>
+        `;
+
+
+        if (i < doc.listPhase.length - 1) {
+            row += `<div class="line-tl"></div>`;
+        }
+    }
+    row +=`</div>`
+   
+    //row += await PhaseView(currentPhaseView)
+
+    return row;
+}
+
+
+async function RerenderTimeline(doc, i, cargo) {
+    let phaseKeys = ['attachmentPhase', 'opinionPhase', 'decisionPhase', 'implementationPhase'];
+
+    const time_line = document.getElementById("timeline");
+    const bodyphase = document.getElementById("bodyphase");
+    const buttonEdit = document.getElementById("buttonEdit");
+    
+    time_line.innerHTML = "";
+    bodyphase.innerHTML = "";
+    buttonEdit.innerHTML = "";
+
+    let div = document.createElement('div');
+    let div2 = document.createElement('div');
+    let div3;
+
+    div.innerHTML = await RenderTimeline(doc, i, cargo);
+    if(phaseKeys[i]=='attachmentPhase') {
+        div2.innerHTML = await PhaseView(doc, i)
+        await FetchAndDisplayDocuments(doc._key)
+    } else {
+        div2.innerHTML = await PhaseView(doc, i)
+    }
+
+    time_line.appendChild(div);
+    bodyphase.appendChild(div2);
+
+    if (cargo === phaseKeys[i]) {
+        div3 = document.createElement('div');
+        if (phaseKeys[doc.currentPhase] !== cargo) {
+            // Renderiza um botão desabilitado
+            div3.innerHTML = `<button class="btn btn-primary btn-lg form-control submit" disabled>Editar</button>`;
+        } else {
+            // Renderiza o link normal
+            div3.innerHTML = `<a aof-view class="btn btn-primary btn-lg form-control submit" href="/process/${doc._key}/${phaseKeys[i]}">Editar</a>`;
+        }
+        buttonEdit.appendChild(div3);
+    }    
+}
+
+
+async function PhaseView(doc, i) {
+    let phaseKeys = ["attachmentPhase", "opinionPhase", "decisionPhase", "implementationPhase"];
+    let phaseViews = {
+        "attachmentPhase": AttachDocuments,
+        "opinionPhase": opinionPhase,
+        "decisionPhase": decisionPhase,
+        "implementationPhase": implementationPhase
+    };
+
+    return await phaseViews[phaseKeys[i]](doc);
+}
+
+async function addObs(_key, phase, obs){
+    let data = {
+        _key: _key,
+        phase: phase,
+        obs: obs,
+    }
+
+    fetchData('/process/add-obs', "PUT", data)
+        .then(data => console.log(data))
+        .catch(error => console.error(error));
+}
+
+
+
+async function submitAttachmentPhase(_key){
+    try {
+        let data = {
+            _key: _key.toString(),
+            accept: true,
+            obs: ""
+        }
+
+        data.obs = document.getElementById("floatingTextarea2").value;
+
+        if(data.obs){
+            console.log(data.obs)
+        }
+        await SaveDocuments(_key)
+            .then(() => {
+                return fetchData("/process/add-obs", "PUT", data);
+            })
+            .then(() => {
+                return fetchData("/process/submitPhase", "PUT", data);
+            });
+    } catch {
+        console.log("Houve algum erro para salvar o arquivo ou atualizar seu status")
+    }
+}
+
+async function submitPhase(_key, accept){
+    try {
+        let data = {
+            _key: _key.toString(),
+            accept: accept,
+            obs: ""
+        }
+
+        data.obs = document.getElementById("floatingTextarea2").value;
+        let radioChecked = document.querySelector('input[name="btnradio"]:checked');
+        data.accept = radioChecked ? radioChecked.value === 'true' : null;
+
+        fetchData("/process/add-obs", "PUT", data)
+        .then(() => {
+            return fetchData("/process/submitPhase", "PUT", data);
+        })
+        .then(() => {
+            window.location.href = `/process/${_key}`;
+        });
+    
+    } catch {
+        console.log("Houve algum erro para atualizar seu status")
+    }
 }
 
 

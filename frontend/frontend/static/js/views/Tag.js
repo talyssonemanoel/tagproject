@@ -53,15 +53,7 @@ export default class extends AbstractView {
                 } else {
             row+= `<a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Xs</a>`
                 }
-            row+= `</li>
-                <li class="nav-item">`
-                if(this.doc._key!="") {                
-            row+= `<a class="nav-link" href="/tag/${this.doc._key}/Processos">Y</a>`
-                } else {
-            row+= `<a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Y</a>`
-                }
-
-        row+= `</li>
+        row+= `
             </ul>
             `
 

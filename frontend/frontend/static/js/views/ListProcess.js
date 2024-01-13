@@ -42,6 +42,9 @@ export default class extends AbstractView {
                     <a class="nav-link" href="/">Home</a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" href="/tag/list">Tags</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link active" href="#">Processos</a>
                 </li>
                 <li class="nav-item">

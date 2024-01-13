@@ -5,6 +5,10 @@ import User from "./views/User.js";
 import listUser from "./views/listUser.js";
 import Process from "./views/Process.js";
 import ListProcess from "./views/ListProcess.js";
+import EditAttachmentPhase from "./views/EditAttachmentPhase.js";
+import EditOpinionPhase from "./views/EditOpinionPhase.js";
+import EditDecisionPhase from "./views/EditDecisionPhase.js";
+
 
 
 
@@ -42,6 +46,10 @@ const router = async () => {
         { path: "/process/list", view: ListProcess },
         { path: "/process/new", view: Process },
         { path: "/process/:_key", view: Process },
+
+        { path: "/process/:_key/attachmentPhase", view: EditAttachmentPhase },
+        { path: "/process/:_key/opinionPhase", view: EditOpinionPhase },
+        { path: "/process/:_key/decisionPhase", view: EditDecisionPhase },
     
         { path: "/tag/:_key/process/list", view: ListProcess },
     ];
