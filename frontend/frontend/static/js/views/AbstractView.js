@@ -1,11 +1,7 @@
 export default class {
     constructor(params) {
         this.params = params;
-        this.user = {
-            structTag: "",
-            role: "strategic",
-            cargo: "attachmentPhase"
-        }
+        this.user
     }
 
     setTitle(title) {

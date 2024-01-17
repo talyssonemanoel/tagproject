@@ -8,6 +8,7 @@ import ListProcess from "./views/ListProcess.js";
 import EditAttachmentPhase from "./views/EditAttachmentPhase.js";
 import EditOpinionPhase from "./views/EditOpinionPhase.js";
 import EditDecisionPhase from "./views/EditDecisionPhase.js";
+import UserSelector from "./views/UserSelector.js";
 
 
 
@@ -33,6 +34,8 @@ const router = async () => {
     const routes = [
         { path: "/", view: Dashboard },
         { path: "/dashboard", view: Dashboard },
+
+        { path: "/user", view: UserSelector },
 
         { path: "/tag/list", view: listTag },
         { path: "/tag/new", view: Tag },

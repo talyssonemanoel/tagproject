@@ -50,5 +50,22 @@ function removeElement(_keyUser, _keyTag) {
 }
 
 
+async function updateUser(cargo){
+    try {
+        let data = {
+            _key: "5374743",
+            cargo: cargo.toString()
+        }
+
+        fetchData("/user/upc", "PUT", data)
+        .then(() => {
+            window.location.href = `/user`;
+        });
+    
+    } catch {
+        console.log("Houve algum erro para atualizar seu status")
+    }
+}
+
 
 

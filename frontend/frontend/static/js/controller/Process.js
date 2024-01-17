@@ -388,7 +388,7 @@ async function RerenderTimeline(doc, i, cargo) {
 
     if (cargo === phaseKeys[i]) {
         div3 = document.createElement('div');
-        if (phaseKeys[doc.currentPhase] !== cargo) {
+        if (phaseKeys[doc.currentPhase] === cargo) {
             // Renderiza um botão desabilitado
             div3.innerHTML = `<button class="btn btn-primary btn-lg form-control submit" disabled>Editar</button>`;
         } else {

@@ -52,6 +52,7 @@ export default class extends AbstractView {
         if (this.params._key) {
             this.doc = await fetchData(`/process/${this.params._key}`, "GET")
             this.currentPhaseView = this.doc.currentPhase;
+            this.user = await fetchData(`/user/getUser`, "GET")
 
             //this.doc.tags = await fetchData(`/process/tags/${this.params._key}`, "GET");
             
@@ -83,7 +84,7 @@ export default class extends AbstractView {
             row +=`</div>`
             row += `
                 <div id="buttonEdit" class="card-footer">`       
-            if(this.phaseKeys[this.doc.currentPhase] == this.user.cargo)
+            if(this.phaseKeys[this.doc.currentPhase] === this.user.cargo)
                 row += `<a aof-view class="btn btn-primary btn-lg form-control submit" href="/process/${this.doc._key}/${this.phaseKeys[this.doc.currentPhase]}" >Editar</a>`
             row +=`</div>`
             if (this.doc.currentPhase == 0) {
@@ -198,7 +199,7 @@ export default class extends AbstractView {
         row += `
             </div>
             <div class="card-footer">`
-        if(this.user.cargo=="attachmentPhase"){
+        if(this.user.cargo==="attachmentPhase"){
             row += `<button aof-view class="btn btn-primary btn-lg form-control submit" onclick="saveStockInput()" >Editar</button>`
         }
         row += ` </div>

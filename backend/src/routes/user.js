@@ -3,6 +3,44 @@ const db = require("../config/database")
 
 const colName = "user"
 
+
+
+router.get('/', async (req, res) => {
+
+  const cursor = await db.query(`
+      for c in ${colName} return c`)
+
+  res.status(200).send(await cursor.all());
+      
+})
+
+router.get('/getUser', async (req, res) => {
+
+const cursor = await db.query(`
+    for c in ${colName} return c`)
+
+res.status(200).send(await cursor.next());
+    
+})
+
+router.put('/upc', async (req, res) => {
+  let data = req.body;
+
+  let result = await db.query(`
+    LET user = DOCUMENT(${colName}, @_key)
+    UPDATE user WITH { cargo: @cargo} IN ${colName}
+    LET n = NEW 
+    RETURN n
+  `, { _key: data._key, cargo: data.cargo});
+
+  result = await result.all();
+
+  res.status(200).send(result[0]);
+})
+
+
+
+
 router.post('/', async (req, res) => {
   try {
     const { _super, name } = req.body
@@ -18,25 +56,6 @@ router.post('/', async (req, res) => {
   }
 });
  
-router.put('/', async (req, res) => {
-    
-    let data = req.body;
-
-    let result = await db.query(`update @data with @data in ${colName} let n = NEW return n`,{"data":data})
-    result = await result.all();
-
-    res.status(200).send(result[0]);
-})
-
-router.get('/', async (req, res) => {
-
-    const cursor = await db.query(`
-        for c in ${colName} return c`)
-
-    res.status(200).send(await cursor.all());
-        
-})
-
 router.get('/name', async (req, res) => {
 
   const name = req.query.name;
@@ -217,5 +236,8 @@ async function getSubordinateTags(key, subordinates = []) {
 
   return subordinates;
 }
+
+
+
 
 module.exports = router;

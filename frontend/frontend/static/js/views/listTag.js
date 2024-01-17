@@ -43,9 +43,6 @@ export default class extends AbstractView {
                 <li class="nav-item">
                     <a class="nav-link active" href="/tag/list">Tags</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/tag/new">Nova Tag</a>
-                </li>
             </ul>
             `
         return row; 

@@ -47,9 +47,6 @@ export default class extends AbstractView {
                 <li class="nav-item">
                     <a class="nav-link active" href="#">Processos</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/process/new">Novo Processo</a>
-                </li>
             </ul>
             `
         return row; 
