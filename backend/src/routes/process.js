@@ -23,6 +23,53 @@ router.post('/', async (req, res) => {
   }
 });
 
+
+router.post('/isenIPTU', async (req, res) => {
+  try {
+
+    const document = {
+      name: "Isenção de IPTU",
+      listClassTag: "",
+      currentPhase: 0,
+      listPhase: [
+        {
+          listClassDocument: [],
+          maxTimeDuration: "",
+          obs: "",
+          type: "attachmentPhase"
+        },
+        {
+          listStructTagProvider: "",
+          maxTimeDuration: -1,
+          obs: "",
+          type: "opinionPhase"
+        },
+        {
+          automaticAcceptanceEvent: false,
+          automaticTrue: false,
+          listStructTagProvider: "",
+          maxTimeDuration: 0,
+          obs: "",
+          type: "decisionPhase"
+        },
+        {
+          listStructTagProvider: "",
+          maxTimeDuration: 0,
+          type: "implementationPhase",
+          obs: ""
+        }
+      ]
+    };
+
+    const cursor = await db.query(`insert @data in ${colName} let n = NEW return n`, { "data": document });
+    const result = await cursor.next();
+    res.status(200).send(result._key);
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+});
+
+
 router.put('/', async (req, res) => {
 
   let data = req.body;

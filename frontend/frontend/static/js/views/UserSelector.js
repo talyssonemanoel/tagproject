@@ -8,13 +8,6 @@ export default class extends AbstractView {
 
         this.doc = {
             _key: "",
-            name: "",
-            structTag: "",
-            tag: {
-                _key: "",
-                role: ""
-            },
-            tags: [],
         };
         this.currentPhaseView;
         this. phaseKeys = ['attachmentPhase', 'opinionPhase', 'decisionPhase', 'implementationPhase']
@@ -55,9 +48,9 @@ export default class extends AbstractView {
         <div class="card">     
                 <div class="card-body">
                 <div class="mb-3">`
-                console.log(this.user)
+
                 if (this.user) {
-                    console.log(this.user)
+
                 row += `<h4>Usuário atual: ${this.user.cargo}</h4>`
             }
                 row += `</div>
@@ -66,7 +59,7 @@ export default class extends AbstractView {
                         <button type="button" class="btn btn-primary" onclick="updateUser('attachmentPhase')">Cidadão</button>
                     </li>
                     <li class="list-group-item">
-                        <button type="button" class="btn btn-primary" onclick="updateUser('opinionPhase')">Opinião</button>
+                        <button type="button" class="btn btn-primary" onclick="updateUser('opinionPhase')">Parecer</button>
                     </li>
                     <li class="list-group-item">
                         <button type="button" class="btn btn-primary" onclick="updateUser('decisionPhase')">Decisão</button>
@@ -78,7 +71,6 @@ export default class extends AbstractView {
         return row;
     }
     
-    // Call this function after the HTML from getHtml is added to the DOM
     
      
 }

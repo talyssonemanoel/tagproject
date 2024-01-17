@@ -326,7 +326,7 @@ async function RenderTimeline(doc, currentPhaseView, cargo) {
         //let phaseKey = Object.keys(doc.listPhase[i])[0]; // Pega a chave da fase
         let phaseNames = [
             "Documentação",
-            "Opinião",
+            "Parecer",
             "Decisão",
             "Implementação"
         ];
@@ -475,6 +475,25 @@ async function submitPhase(_key, accept){
         console.log("Houve algum erro para atualizar seu status")
     }
 }
+
+
+async function newIsenIPTU(){
+    try {
+        let response = await fetchData("/process/isenIPTU", "POST");
+        let _key = response
+        console.log(_key)
+        if (_key) {
+            let stringKey = _key.toString();
+            window.location.href = `/process/${stringKey}/attachmentPhase`;
+        }
+    
+    } catch {
+        console.log("Houve algum erro para atualizar seu status");
+    }
+}
+
+
+
 
 
 

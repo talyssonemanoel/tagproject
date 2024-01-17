@@ -41,7 +41,7 @@ export default class extends AbstractView {
                     <a class="nav-link" href="/process/${this.doc._key}">${this.doc.name}</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link active">Opinião</a>
+                    <a class="nav-link active">Parecer</a>
                 </li>
             </ul>
             `
@@ -71,7 +71,7 @@ export default class extends AbstractView {
 
         if (this.doc._key) {
             row += `
-                <h3 class=" card-header h-100 d-flex justify-content-center">Opinião</h3>
+                <h3 class=" card-header h-100 d-flex justify-content-center">Parecer</h3>
                 <div class="card-body">
                     <div class="mb-3">
                         <div class="d-flex justify-content-center">
@@ -98,7 +98,7 @@ export default class extends AbstractView {
                 </div>
                 <div id="buttonEdit" class="card-footer">`
                 if (this.doc.currentPhase == 1){
-                    row += `<button id="saveButton" aof-view class="btn btn-primary btn-lg form-control" onclick='submitPhase(${this.doc._key})' disabled>Salvar</button>`
+                    row += `<button id="saveButton" aof-view class="btn btn-primary btn-lg form-control" onclick='submitPhase(${this.doc._key})' disabled>Finalizar</button>`
                 }                
                 row += `</div>`
         }

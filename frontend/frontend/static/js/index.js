@@ -9,6 +9,7 @@ import EditAttachmentPhase from "./views/EditAttachmentPhase.js";
 import EditOpinionPhase from "./views/EditOpinionPhase.js";
 import EditDecisionPhase from "./views/EditDecisionPhase.js";
 import UserSelector from "./views/UserSelector.js";
+import LinkSolicitacao from "./views/LinkSolicitacao.js";
 
 
 
@@ -53,6 +54,8 @@ const router = async () => {
         { path: "/process/:_key/attachmentPhase", view: EditAttachmentPhase },
         { path: "/process/:_key/opinionPhase", view: EditOpinionPhase },
         { path: "/process/:_key/decisionPhase", view: EditDecisionPhase },
+
+        { path: "/request-service", view: LinkSolicitacao },
     
         { path: "/tag/:_key/process/list", view: ListProcess },
     ];

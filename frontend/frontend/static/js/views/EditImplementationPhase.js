@@ -98,7 +98,7 @@ export default class extends AbstractView {
                 </div>
                 <div id="buttonEdit" class="card-footer">`
                 if (this.doc.currentPhase == 3){
-                    row += `<button id="saveButton" aof-view class="btn btn-primary btn-lg form-control" onclick='submitPhase(${this.doc._key})' disabled>Salvar</button>`
+                    row += `<button id="saveButton" aof-view class="btn btn-primary btn-lg form-control" onclick='submitPhase(${this.doc._key})' disabled>Finalizar</button>`
                 }                
                 row += `</div>`
         }

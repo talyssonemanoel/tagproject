@@ -95,12 +95,10 @@ export default class extends AbstractView {
                             </div>
                         </div>
                     </div>
-                    <button aof-view class="btn btn-primary button-add-service h-100" onclick='SaveDocuments("4911637")'>Salvar doc</button>
-                    <button aof-view class="btn btn-primary button-add-service h-100" onclick='FetchAndDisplayDocuments("4911637")'>Mostrar docs</button>
                 </div>
                 <div id="buttonEdit" class="card-footer">`
                 if (this.doc.currentPhase == 0){
-                    row += `<button aof-view class="btn btn-primary btn-lg form-control" onclick='submitAttachmentPhase(${this.doc._key})' >Salvar</button>`
+                    row += `<button aof-view class="btn btn-primary btn-lg form-control" onclick='submitAttachmentPhase(${this.doc._key})' >Finalizar</button>`
                 }
                 row += `</div>`
         }

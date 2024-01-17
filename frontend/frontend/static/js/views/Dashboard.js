@@ -20,16 +20,8 @@ export default class extends AbstractView {
             <div class="card">
                 <div class="card-header">
                 </div>                
-                <div class="card-body">`
-                this.list.forEach(element => {
-        row += `
-                    <div class="card">
-                        <div class="card-head">
-                            <a id="${element._key}" class="btn btn-outline-primary form-control" href="/tag/${element._key}">${element.name}</a>                        </div>
-                    </div>`
-                        
-                })
-                row += `
+                <div class="card-body">
+                
                 </div>
             </div>`
             //<img onload="showStatus('/status/contract')" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==" >`
@@ -49,7 +41,7 @@ export default class extends AbstractView {
                         <a class="nav-link" href="/tag/list">Tags</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/user/">Usuários</a>
+                        <a class="nav-link" href="/user">Usuários</a>
                 </li>
                 ${this.user && (this.user.role === "strategic" || this.user.role === "tactical") ?
                     `<li class="nav-item">
