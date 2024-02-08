@@ -6,6 +6,7 @@ const collectionConfig = [
     {name:"config", type: 1},
     {name:"user", type: 1},
     {name:"process", type: 1},
+    {name:"document", type: 1},
 ];
 
 module.exports = collectionConfig;

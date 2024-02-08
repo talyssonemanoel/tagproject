@@ -11,6 +11,7 @@ const cors = require('cors');
 const tag = require('./src/routes/tag')
 const user = require('./src/routes/user')
 const process = require('./src/routes/process')
+const document = require('./src/routes/document')
 const dashboard = require('./src/routes/dashboard')
 
 const app = express();
@@ -27,6 +28,7 @@ app.use(morgan('dev'));
 app.use('/tag', tag);
 app.use('/user', user);
 app.use('/process', process);
+app.use('/document', document);
 app.use('/dashboard',dashboard);
 
 

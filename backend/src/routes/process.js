@@ -24,6 +24,42 @@ router.post('/', async (req, res) => {
 });
 
 
+
+router.post('/:key/page', async (req, res) => {
+  try {
+    const pageItem = req.body;
+    const { key } = req.params;
+
+    // Criar um novo documento na coleção 'Documents'
+    const newDoc = await db.collection('Document').save(pageItem);
+
+    // Buscar o documento correspondente
+    const doc = await db.collection(colName).document(key);
+
+    if (doc && doc.listPage) {
+        // Adicionar a chave do novo documento à lista 'listPage'
+        doc.listPage.push(newDoc._key);
+
+        // Atualizar o documento no banco de dados
+        const aqlQuery = `
+          UPDATE @key WITH { listPage: @listPage } IN process
+        `;
+        const bindVars = { key: key.toString(), listPage: doc.listPage };
+        await db.query(aqlQuery, bindVars);
+
+        res.json({ success: true, message: 'Página adicionada com sucesso' });
+    } else {
+        res.status(404).json({ success: false, error: 'Documento não encontrado ou sem propriedade listPage' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: 'Erro interno do servidor' });
+  }
+});
+
+
+
+
 router.post('/isenIPTU', async (req, res) => {
   try {
 
@@ -121,6 +157,34 @@ router.get('/', async (req, res) => {
   res.status(200).send(await cursor.all());
 
 })
+
+router.get('/get-process-by-tag-key/:key', async (req, res) => {
+
+  const key = req.params.key;
+  
+  const cursor = await db.query(`
+        for c in ${colName}
+        filter c.listTag[c.currentTag] == @key
+        return c`, {key: key})
+
+  res.status(200).send(await cursor.all());
+  console.log(cursor.all())
+})
+
+router.get('/:key/get-paginas', async (req, res) => {
+  try {
+    const { key } = req.params;
+
+    const tag = {
+      _super,
+      name
+    }
+    const cursor = await db.query(`insert @data in ${colName} let n = NEW return n`, { "data": tag });
+    res.status(200).send(cursor.next());
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+});
 
 router.get('/fetch-documents', async (req, res) => {
   try {
@@ -308,6 +372,10 @@ async function getSubordinateTags(key, subordinates = []) {
   return subordinates;
 }
 
+
+
+
+
 router.post('/find-process', async (req, res) => {
   try {
     const { structTag } = req.body
@@ -407,7 +475,7 @@ router.put('/move-process', async (req, res) => {
   }
 })
 
-router.put('/attach-documents', async (req, res) => {
+/*router.put('/attach-documents', async (req, res) => {
   try {
     const file = req.files.file;
     const _key = req.body._key;
@@ -437,7 +505,48 @@ router.put('/attach-documents', async (req, res) => {
     console.error(error);
     res.status(500).json({ message: 'Ocorreu um erro ao anexar o documento.' });
   }
+});*/
+
+router.put('/attach-documents', async (req, res) => {
+  try {
+    const file = req.files.file;
+    const _key = req.body._key;
+
+    // Usando o buffer diretamente
+    const fileBuffer = file.data;
+
+    // Convertendo o buffer para base64
+    const base64File = fileBuffer.toString('base64');
+
+    // Criar um novo documento na coleção 'documents'
+    const docKey = await db.collection('documents').create({
+      doc: base64File,
+      format: file.mimetype,
+      nome: file.name
+    });
+
+    // Buscar o documento
+    let doc = await db.collection(colName).document(_key);
+
+    // Encontrar o índice da fase de anexo
+    let phaseIndex = 0;
+
+    // Atualizar a lista de documentos da fase de anexo
+    if (phaseIndex !== -1) {
+      doc.listPhase[0].listClassDocument.push(docKey);
+    }
+
+    // Atualizar o documento inteiro
+    let result = await db.collection(colName).update(_key, doc);
+
+    res.status(200).json({ message: 'Documento anexado com sucesso!' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Ocorreu um erro ao anexar o documento.' });
+  }
 });
+
+
 
 
 
@@ -467,5 +576,32 @@ router.put('/clear-documents', async (req, res) => {
     res.status(500).json({ message: 'Ocorreu um erro ao remover os documentos.' });
   }
 });
+
+
+router.put('/next-tag/:key', async (req, res) => {
+
+  const key = req.params.key;
+  
+  // Primeiro, obtenha o documento atual
+  const doc = await db.collection(colName).document(key);
+
+  // Verifique se currentTag é menor que listTag.length - 1
+  if (doc.currentTag < doc.listTag.length - 1) {
+    // Incremente currentTag
+    doc.currentTag += 1;
+
+    // Atualize o documento no banco de dados
+    await db.collection(colName).update(key, { currentTag: doc.currentTag });
+    
+    res.status(200).send({ message: 'Document updated successfully' });
+  } else {
+    res.status(400).send({ message: 'Cannot increment currentTag beyond listTag length' });
+  }
+
+});
+
+
+
+
 
 module.exports = router;

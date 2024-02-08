@@ -17,10 +17,7 @@ export default class extends AbstractView {
             tags: [],
         };
         this.currentPhaseView;
-        this.phaseKeys = ['attachmentPhase', 'opinionPhase', 'decisionPhase', 'implementationPhase']
-        
-        
-        
+        this. phaseKeys = ['attachmentPhase', 'opinionPhase', 'decisionPhase', 'implementationPhase']
     }
 
     async getMenu() {
@@ -58,14 +55,14 @@ export default class extends AbstractView {
             this.user = await fetchData(`/user/getUser`, "GET")
 
             //this.doc.tags = await fetchData(`/process/tags/${this.params._key}`, "GET");
-
+            
         }
     }
     async getHtml() {
 
         let row = ``
 
-        row += `<input type="hidden" class="aof-input" id="_key" value=${this.doc._key}>`
+        row += `<input type="hidden" class="aof-input" id="_key" value=>`
         row += `<input type="hidden" class="aof-input" id="farm_key" value=}>`
 
         row += `
@@ -79,46 +76,21 @@ export default class extends AbstractView {
                 <h3 class=" card-header h-100 d-flex justify-content-center">${this.doc.name}: ${this.doc._key}</h3>
                 <div class="card-body">
             `
-            row += `
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <div>
-                        <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-                            <input type="radio" class="btn-check" name="btnradioaba" id="btnradioaba1" autocomplete="off" checked onclick='ShowIntegra("${this.doc.listPage.join(",")}")'>
-                            <label class="btn btn-outline-primary" for="btnradioaba1">Integra</label>
-
-                            <input type="radio" class="btn-check" name="btnradioaba" id="btnradioaba2" autocomplete="off" onclick="ShowEdit()">
-                            <label class="btn btn-outline-primary" for="btnradioaba2">Edição</label>
-                            <input type="radio" class="btn-check" name="btnradioaba" id="btnradioaba3" autocomplete="off" onclick=" ShowUpload()">
-                            <label class="btn btn-outline-primary" for="btnradioaba3">Upload</label>
-                        </div>
-                        </div>
-                    </div>
-                    <div id = "card-body-process" class="card-body">
-                    </div>`
-                    
-                    row += `<div class="card-footer">`
-                    row += `<button aof-view class="btn btn-primary btn-lg form-control submit" id="saveButton" onclick="SavePage()" style="display: none;">Salvar</button>
-
-                    `
-                    row += `</div>` 
-            row += `
-                </div>
-                
-            `      
-
-                    
+            row += `<div id="timeline">`
+            row += await RenderTimeline(this.doc, this.currentPhaseView, this.user.cargo)
             row += `</div>`
-            row += `<div class="card-footer">`
-            row += `<button aof-view class="btn btn-primary btn-lg form-control submit" onclick="NextProcess(${this.doc._key})" >Próximo</button>`
-            row += `</div>`
-
-
-            setTimeout(async function() {
-                if(document.getElementById("card-body-process")){
-                    await ShowIntegra();
-                }
-            }, 0);
+            row +=`<div id="bodyphase">`
+            row += await PhaseView(this.doc, this.currentPhaseView)
+            row +=`</div>`
+            row +=`</div>`
+            row += `
+                <div id="buttonEdit" class="card-footer">`       
+            if(this.phaseKeys[this.doc.currentPhase] === this.user.cargo)
+                row += `<a aof-view class="btn btn-primary btn-lg form-control submit" href="/process/${this.doc._key}/${this.phaseKeys[this.doc.currentPhase]}" >Editar</a>`
+            row +=`</div>`
+            if (this.doc.currentPhase == 0) {
+                await FetchAndDisplayDocuments(this.doc._key)
+            }
         } else {
             row +=
                 `<div class="card-body">
@@ -136,9 +108,9 @@ export default class extends AbstractView {
                         </div>
                         <hr>
                         `
-
-            if (1 < 2) {
-                row += `
+        
+        if (1 < 2) {
+            row += `
                             <div class="card">
                                 <div class="card-header">
                                    Mover processo
@@ -171,25 +143,25 @@ export default class extends AbstractView {
                                     <h6 class="card-text">Tags</h6>
                                     <div id="list_tag" class="d-flex flex-wrap justify-content-center">
                                     `
-                /*for (let i = 0; i < this.doc.tags.length; i++) {
-                    row += `<div class="btn-group" id="${this.doc.tags[i]._key}">
-                         <button type="button" disabled class="btn btn-sm btn-primary">${this.doc.tags[i].name}</button>
-                         <button type="button" disabled class="btn btn-sm btn-secondary">${this.doc.tags[i].role}</button>
-                         <button type="button" class="btn btn-sm" onclick="removeProcessElement('${this.doc._key}', '${this.doc.tags[i]._key}')">X</button>
-                     </div>`
-                 }*/
+            /*for (let i = 0; i < this.doc.tags.length; i++) {
+                row += `<div class="btn-group" id="${this.doc.tags[i]._key}">
+                     <button type="button" disabled class="btn btn-sm btn-primary">${this.doc.tags[i].name}</button>
+                     <button type="button" disabled class="btn btn-sm btn-secondary">${this.doc.tags[i].role}</button>
+                     <button type="button" class="btn btn-sm" onclick="removeProcessElement('${this.doc._key}', '${this.doc.tags[i]._key}')">X</button>
+                 </div>`
+             }*/
 
-                row += `
+            row += `
                         </div>
                     </div>
                 </div>`
 
 
-                row += `<input type="hidden" class="aof-input-json" id="product" value=${this.doc.tag}>`
+            row += `<input type="hidden" class="aof-input-json" id="product" value=${this.doc.tag}>`
 
 
-                row += `<hr>`
-                row += ` 
+            row += `<hr>`
+            row += ` 
                 <div class="card">
                     <div class="card-header">
                         Atribuir responsabilidade
@@ -223,21 +195,20 @@ export default class extends AbstractView {
                 </div>
                 </div>
         `
-            }
+        }
 
-            row += `
+        row += `
             </div>
             <div class="card-footer">`
-            if (this.user.cargo === "attachmentPhase") {
-                row += `<button aof-view class="btn btn-primary btn-lg form-control submit" onclick="saveStockInput()" >Editar</button>`
-            }
-            row += ` </div>
-        </div>`
-            //row += `<img onload='updateStockInputForm(${JSON.stringify(this.doc)})' src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==' >`
-
+        if(this.user.cargo==="attachmentPhase"){
+            row += `<button aof-view class="btn btn-primary btn-lg form-control submit" onclick="saveStockInput()" >Editar</button>`
         }
-        
+        row += ` </div>
+        </div>`
+        //row += `<img onload='updateStockInputForm(${JSON.stringify(this.doc)})' src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==' >`
+
+    }
         return row;
     }
-
+    
 }

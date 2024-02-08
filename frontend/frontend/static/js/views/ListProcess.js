@@ -19,7 +19,7 @@ export default class extends AbstractView {
         row += `
                     <div class="card">
                         <div class="card-head">
-                            <a id="${element._key}" class="btn btn-outline-primary form-control" href="/process/${element._key}">${element.name}</a>
+                            <a id="${element._key}" class="btn btn-outline-primary form-control" href="/process/${element._key}">${element.name}: ${element._key}</a>
                         </div>
                     </div>`
                         
@@ -53,8 +53,8 @@ export default class extends AbstractView {
     }
 
     async init() {
-
-        this.list = await fetchData(`/process`, "GET")
+        console.log(this.params._key)
+        this.list = await fetchData(`/process/get-process-by-tag-key/${this.params._key}`, "GET")
 
     }
 

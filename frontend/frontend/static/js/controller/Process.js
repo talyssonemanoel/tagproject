@@ -223,6 +223,8 @@ async function SaveDocuments(_key) {
 
 
 
+
+
 async function FetchAndDisplayDocuments(_key) {
     fetch(`http://localhost:3001/process/fetch-documents?_key=${_key}`)
     .then(response => response.json())
@@ -477,6 +479,8 @@ async function submitPhase(_key, accept){
 }
 
 
+
+
 async function newIsenIPTU(){
     try {
         let response = await fetchData("/process/isenIPTU", "POST");
@@ -491,6 +495,243 @@ async function newIsenIPTU(){
         console.log("Houve algum erro para atualizar seu status");
     }
 }
+
+
+
+async function ShowTextarea() {
+    const textArea = document.getElementById("text-area");
+    
+    let div = document.createElement('div');
+    div.setAttribute('id', 'editor');
+    div.setAttribute('class', 'form-control mt-3');
+
+    CKEDITOR.replace('editor');
+
+    // Adicione um ouvinte de evento para 'change'
+    CKEDITOR.instances.editor.on('change', function() {
+        // Verificar se o editor está vazio
+        if (this.getData().trim() === '') {
+            // Ocultar o botão "Salvar" se o editor estiver vazio
+            document.getElementById('saveButton').style.display = 'none';
+        } else {
+            // Mostrar o botão "Salvar" se o editor não estiver vazio
+            document.getElementById('saveButton').style.display = 'block';
+        }
+    });
+}
+
+
+
+
+async function ShowIntegra(listPage) {
+    
+    listPage = listPage.split(",");
+    const cardBody = document.getElementById("card-body-process");
+
+    console.log(listPage)
+
+    // Verifique se o elemento existe antes de tentar acessar suas propriedades
+    if (cardBody) {
+        cardBody.innerHTML = "";
+
+        let div = document.createElement('div');
+
+        listPage.forEach((element, index) => {
+            div.innerHTML += `
+                <div class="card">
+                    <div class="card-head">
+                        <input type="checkbox" class="btn-check" id="btncheck${index}" autocomplete="off" onchange="handleCheckboxChange(${index}, ${listPage.length})" value=${listPage[index]}>
+                        <label class="btn btn-outline-primary w-100" for="btncheck${index}">Página ${index+1}</label>
+                    </div>
+                    <div id="details-page-${index}"></div>
+                </div>`;
+        });
+        
+
+        cardBody.appendChild(div);
+        document.getElementById('saveButton').style.display = 'none';
+    } else {
+        console.log("Elemento 'card-body-process' não encontrado");
+    }
+}
+
+async function handleCheckboxChange(index) {
+    const checkbox = document.getElementById(`btncheck${index}`);
+    if (checkbox.checked) {
+        await ShowDetails(index);
+    } else {
+        const detailsBody = document.getElementById(`details-page-${index}`);
+        if (detailsBody) {
+            detailsBody.innerHTML = "";  // Limpa o conteúdo quando a caixa de seleção é desmarcada
+        }
+    }
+}
+
+
+async function ShowDetails(index) {
+
+    console.log(index)
+
+    const detailsBody = document.getElementById(`details-page-${index}`);
+
+    const keyDoc = document.getElementById(`btncheck${index}`).value;
+
+    const documentoo = await fetchData(`/document/${keyDoc}`, "GET")
+
+    // Verifique se o elemento existe antes de tentar acessar suas propriedades
+    if (detailsBody) {
+        detailsBody.innerHTML = `<div class="p-3 h-100 w-100">${documentoo.content}</div>`;
+
+    } else {
+        console.log("Elemento 'card-body-process' não encontrado");
+    }
+}
+
+
+async function ShowEdit() {
+    
+    const cardBody = document.getElementById("card-body-process");
+
+    // Verifique se o elemento existe antes de tentar acessar suas propriedades
+    if (cardBody) {
+        cardBody.innerHTML = "";
+
+        let div = document.createElement('div');
+
+        div.innerHTML = `<div class="btn-group w-100" role="group" aria-label="Basic radio toggle button group">
+                            <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" onclick="ShowTextarea()">
+                            <label class="btn btn-outline-primary" for="btnradio1">Parecer</label>
+                        
+                            <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off" onclick="ShowTextarea()">
+                            <label class="btn btn-outline-primary" for="btnradio2">Decisão</label>
+                        
+                            <input type="radio" class="btn-check" name="btnradio" id="btnradio3" autocomplete="off" onclick="ShowTextarea()">
+                            <label class="btn btn-outline-primary" for="btnradio3">Despacho</label>
+                        </div>
+                        <div id="editor" class="">
+                        </div>
+                        `
+
+        cardBody.appendChild(div);
+    } else {
+        console.log("Elemento 'card-body-process' não encontrado");
+    }
+}
+
+async function ShowUpload() {
+    
+    const cardBody = document.getElementById("card-body-process");
+
+    // Verifique se o elemento existe antes de tentar acessar suas propriedades
+    if (cardBody) {
+        cardBody.innerHTML = "";
+
+        let div = document.createElement('div');
+
+        div.innerHTML = `<div class="mb-3">
+                            <label for="formFile" class="form-label">CPF</label>
+                            <input class="form-control" type="file" id="formFile1">
+                        </div>
+                        <div class="mb-3">
+                            <label for="formFile" class="form-label">RG</label>
+                            <input class="form-control" type="file" id="formFile2">
+                        </div>
+                        <div class="mb-3">
+                            <label for="formFileMultiple" class="form-label">Outro</label>
+                            <input class="form-control" type="file" id="formFile3" multiple>
+                        </div>
+                        `
+
+        cardBody.appendChild(div);
+    } else {
+        console.log("Elemento 'card-body-process' não encontrado");
+    }
+}
+
+async function SaveDocumentation(_key) {
+    let data = new FormData();
+    data.append('_key', _key);
+    data.append('file', document.getElementById("formFile1").files[0]);
+
+    try {
+        let response = await fetch('http://localhost:3001/process/attach-documents', {
+            method: 'PUT',
+            body: data
+        });
+
+        let responseData = await response.json();
+        console.log(responseData);
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+
+async function SavePage() {
+    // Obter a instância do CKEditor
+    const editor = CKEDITOR.instances.editor;
+    let key = document.getElementById("_key").value
+
+    // Obter o conteúdo do CKEditor
+    const pageItem = editor.getData();
+
+
+    // Enviar uma solicitação POST ao seu servidor Express
+    //fetchData("/process/add-obs", "PUT", data)
+    const response = await fetch(`http://localhost:3001/process/${key}/page`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ type: 'text', content: pageItem })
+    });
+
+    if (!response.ok) {
+        console.error('Erro ao salvar a página:', response.statusText);
+    } else {
+        console.log('Página salva com sucesso');
+    }
+}
+
+
+async function getDocument() {
+    // Obter a instância do CKEditor
+    const editor = CKEDITOR.instances.editor;
+    let key = document.getElementById("_key").value
+
+    // Obter o conteúdo do CKEditor
+    const pageItem = editor.getData();
+
+
+    // Enviar uma solicitação POST ao seu servidor Express
+    //fetchData("/process/add-obs", "PUT", data)
+    const response = await fetch(`http://localhost:3001/document/${key}`, {
+        method: 'GET',
+    });
+
+    if (!response.ok) {
+        console.error('Erro ao salvar a página:', response.statusText);
+    } else {
+        console.log('Página salva com sucesso');
+    }
+}
+
+async function NextProcess(key) {
+
+    const _key = key.toString()
+    
+    const response = await fetch(`http://localhost:3001/process/next-tag/${_key}`, {
+        method: 'PUT',
+    });
+
+    if (!response.ok) {
+        console.error('Erro ao enviar processo:', response.statusText);
+    } else {
+        console.log('Processo enviado com sucesso');
+    }
+}
+
+
 
 
 
