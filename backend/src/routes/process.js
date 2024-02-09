@@ -507,11 +507,12 @@ router.put('/move-process', async (req, res) => {
   }
 });*/
 
-router.put('/attach-documents', async (req, res) => {
+router.post('/attach-documents', async (req, res) => {
+  console.log(req.files.file)
   try {
     const file = req.files.file;
     const _key = req.body._key;
-
+    
     // Usando o buffer diretamente
     const fileBuffer = file.data;
 
@@ -519,22 +520,18 @@ router.put('/attach-documents', async (req, res) => {
     const base64File = fileBuffer.toString('base64');
 
     // Criar um novo documento na coleção 'documents'
-    const docKey = await db.collection('documents').create({
-      doc: base64File,
-      format: file.mimetype,
-      nome: file.name
+    const docKey = await db.collection('Document').save({
+      type: req.body.type,
+      classDocument: req.body.classDocument,
+      docName: file.name,
+      formatDoc: file.mimetype,
+      content: base64File,
     });
-
     // Buscar o documento
     let doc = await db.collection(colName).document(_key);
 
-    // Encontrar o índice da fase de anexo
-    let phaseIndex = 0;
-
     // Atualizar a lista de documentos da fase de anexo
-    if (phaseIndex !== -1) {
-      doc.listPhase[0].listClassDocument.push(docKey);
-    }
+    doc.listPage.push(docKey._key);
 
     // Atualizar o documento inteiro
     let result = await db.collection(colName).update(_key, doc);

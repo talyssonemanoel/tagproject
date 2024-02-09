@@ -203,51 +203,32 @@ async function AttachDocuments(doc) {
     `)
 }
 
-async function SaveDocuments(_key) {
-    let data = new FormData();
-    data.append('_key', _key);
-    data.append('file', document.getElementById("inputGroupFile01").files[0]);
-
-    try {
-        let response = await fetch('http://localhost:3001/process/attach-documents', {
-            method: 'PUT',
-            body: data
-        });
-
-        let responseData = await response.json();
-        console.log(responseData);
-    } catch (error) {
-        console.error(error);
-    }
-}
-
-
 
 
 
 async function FetchAndDisplayDocuments(_key) {
     fetch(`http://localhost:3001/process/fetch-documents?_key=${_key}`)
-    .then(response => response.json())
-    .then(data => {
-        let listDoc = document.getElementById('list_doc');
-        data.forEach((base64String, index) => {
-            let binaryString = window.atob(base64String);
-            let len = binaryString.length;
-            let bytes = new Uint8Array(len);
-            for (let i = 0; i < len; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
-            }
-            let blob = new Blob([bytes.buffer]);
-            let url = window.URL.createObjectURL(blob);
-            let link = document.createElement('a');
-            link.href = url;
-            link.download = `document${index + 1}.pdf`; // Substitua '.pdf' pelo tipo de arquivo correto
-            link.textContent = `Download Document ${index + 1}`;
-            listDoc.appendChild(link);
-            // Adicione uma quebra de linha após cada link, se desejar
-            //listDoc.appendChild(document.createElement('br'));
+        .then(response => response.json())
+        .then(data => {
+            let listDoc = document.getElementById('list_doc');
+            data.forEach((base64String, index) => {
+                let binaryString = window.atob(base64String);
+                let len = binaryString.length;
+                let bytes = new Uint8Array(len);
+                for (let i = 0; i < len; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+                let blob = new Blob([bytes.buffer]);
+                let url = window.URL.createObjectURL(blob);
+                let link = document.createElement('a');
+                link.href = url;
+                link.download = `document${index + 1}.pdf`; // Substitua '.pdf' pelo tipo de arquivo correto
+                link.textContent = `Download Document ${index + 1}`;
+                listDoc.appendChild(link);
+                // Adicione uma quebra de linha após cada link, se desejar
+                //listDoc.appendChild(document.createElement('br'));
+            });
         });
-    });
 }
 
 
@@ -354,8 +335,8 @@ async function RenderTimeline(doc, currentPhaseView, cargo) {
             row += `<div class="line-tl"></div>`;
         }
     }
-    row +=`</div>`
-   
+    row += `</div>`
+
     //row += await PhaseView(currentPhaseView)
 
     return row;
@@ -368,7 +349,7 @@ async function RerenderTimeline(doc, i, cargo) {
     const time_line = document.getElementById("timeline");
     const bodyphase = document.getElementById("bodyphase");
     const buttonEdit = document.getElementById("buttonEdit");
-    
+
     time_line.innerHTML = "";
     bodyphase.innerHTML = "";
     buttonEdit.innerHTML = "";
@@ -378,7 +359,7 @@ async function RerenderTimeline(doc, i, cargo) {
     let div3;
 
     div.innerHTML = await RenderTimeline(doc, i, cargo);
-    if(phaseKeys[i]=='attachmentPhase') {
+    if (phaseKeys[i] == 'attachmentPhase') {
         div2.innerHTML = await PhaseView(doc, i)
         await FetchAndDisplayDocuments(doc._key)
     } else {
@@ -398,7 +379,7 @@ async function RerenderTimeline(doc, i, cargo) {
             div3.innerHTML = `<a aof-view class="btn btn-primary btn-lg form-control submit" href="/process/${doc._key}/${phaseKeys[i]}">Editar</a>`;
         }
         buttonEdit.appendChild(div3);
-    }    
+    }
 }
 
 
@@ -414,7 +395,7 @@ async function PhaseView(doc, i) {
     return await phaseViews[phaseKeys[i]](doc);
 }
 
-async function addObs(_key, phase, obs){
+async function addObs(_key, phase, obs) {
     let data = {
         _key: _key,
         phase: phase,
@@ -428,7 +409,7 @@ async function addObs(_key, phase, obs){
 
 
 
-async function submitAttachmentPhase(_key){
+async function submitAttachmentPhase(_key) {
     try {
         let data = {
             _key: _key.toString(),
@@ -438,7 +419,7 @@ async function submitAttachmentPhase(_key){
 
         data.obs = document.getElementById("floatingTextarea2").value;
 
-        if(data.obs){
+        if (data.obs) {
             console.log(data.obs)
         }
         await SaveDocuments(_key)
@@ -453,7 +434,7 @@ async function submitAttachmentPhase(_key){
     }
 }
 
-async function submitPhase(_key, accept){
+async function submitPhase(_key, accept) {
     try {
         let data = {
             _key: _key.toString(),
@@ -466,13 +447,13 @@ async function submitPhase(_key, accept){
         data.accept = radioChecked ? radioChecked.value === 'true' : null;
 
         fetchData("/process/add-obs", "PUT", data)
-        .then(() => {
-            return fetchData("/process/submitPhase", "PUT", data);
-        })
-        .then(() => {
-            window.location.href = `/process/${_key}`;
-        });
-    
+            .then(() => {
+                return fetchData("/process/submitPhase", "PUT", data);
+            })
+            .then(() => {
+                window.location.href = `/process/${_key}`;
+            });
+
     } catch {
         console.log("Houve algum erro para atualizar seu status")
     }
@@ -481,7 +462,7 @@ async function submitPhase(_key, accept){
 
 
 
-async function newIsenIPTU(){
+async function newIsenIPTU() {
     try {
         let response = await fetchData("/process/isenIPTU", "POST");
         let _key = response
@@ -490,7 +471,7 @@ async function newIsenIPTU(){
             let stringKey = _key.toString();
             window.location.href = `/process/${stringKey}/attachmentPhase`;
         }
-    
+
     } catch {
         console.log("Houve algum erro para atualizar seu status");
     }
@@ -500,7 +481,7 @@ async function newIsenIPTU(){
 
 async function ShowTextarea() {
     const textArea = document.getElementById("text-area");
-    
+
     let div = document.createElement('div');
     div.setAttribute('id', 'editor');
     div.setAttribute('class', 'form-control mt-3');
@@ -508,7 +489,7 @@ async function ShowTextarea() {
     CKEDITOR.replace('editor');
 
     // Adicione um ouvinte de evento para 'change'
-    CKEDITOR.instances.editor.on('change', function() {
+    CKEDITOR.instances.editor.on('change', function () {
         // Verificar se o editor está vazio
         if (this.getData().trim() === '') {
             // Ocultar o botão "Salvar" se o editor estiver vazio
@@ -524,7 +505,7 @@ async function ShowTextarea() {
 
 
 async function ShowIntegra(listPage) {
-    
+
     listPage = listPage.split(",");
     const cardBody = document.getElementById("card-body-process");
 
@@ -541,12 +522,12 @@ async function ShowIntegra(listPage) {
                 <div class="card">
                     <div class="card-head">
                         <input type="checkbox" class="btn-check" id="btncheck${index}" autocomplete="off" onchange="handleCheckboxChange(${index}, ${listPage.length})" value=${listPage[index]}>
-                        <label class="btn btn-outline-primary w-100" for="btncheck${index}">Página ${index+1}</label>
+                        <label class="btn btn-outline-primary w-100" for="btncheck${index}">Página ${index + 1}</label>
                     </div>
                     <div id="details-page-${index}"></div>
                 </div>`;
         });
-        
+
 
         cardBody.appendChild(div);
         document.getElementById('saveButton').style.display = 'none';
@@ -569,27 +550,62 @@ async function handleCheckboxChange(index) {
 
 
 async function ShowDetails(index) {
-
     console.log(index)
 
     const detailsBody = document.getElementById(`details-page-${index}`);
-
     const keyDoc = document.getElementById(`btncheck${index}`).value;
-
     const documentoo = await fetchData(`/document/${keyDoc}`, "GET")
 
-    // Verifique se o elemento existe antes de tentar acessar suas propriedades
     if (detailsBody) {
-        detailsBody.innerHTML = `<div class="p-3 h-100 w-100">${documentoo.content}</div>`;
+        detailsBody.innerHTML = ""; // Limpe o conteúdo existente
 
+        if (documentoo.formatDoc === 'text/plain') {
+            // Se o documento for texto, exiba-o normalmente
+            detailsBody.innerHTML = `<div class="p-3 h-100 w-100">${documentoo.content}</div>`;
+        } else if (['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation'].includes(documentoo.formatDoc)) {
+            // Se o documento for um PDF, Word, Excel ou PowerPoint, crie um Blob e exiba-o em um elemento <embed>
+            let fileData = atob(documentoo.content);
+            let byteArray = new Uint8Array(fileData.length);
+            for (let i = 0; i < fileData.length; i++) {
+                byteArray[i] = fileData.charCodeAt(i);
+            }
+            let blob = new Blob([byteArray.buffer], { type: documentoo.formatDoc });
+            let url = URL.createObjectURL(blob);
+
+            let embed = document.createElement('embed');
+            embed.src = url;
+            embed.type = documentoo.formatDoc;
+            embed.style.width = "100%";
+            embed.style.height = "100%";
+
+            detailsBody.appendChild(embed);
+        } else if (documentoo.formatDoc.startsWith('image/')) {
+            // Se o documento for uma imagem, exiba-a em um elemento <img>
+            let img = document.createElement('img');
+            img.src = `data:${documentoo.formatDoc};base64,${documentoo.content}`;
+            img.style.width = "100%";
+            img.style.height = "auto";
+
+            detailsBody.appendChild(img);
+        } else if (documentoo.formatDoc.startsWith('video/')) {
+            // Se o documento for um vídeo, exiba-o em um elemento <video>
+            let video = document.createElement('video');
+            video.src = `data:${documentoo.formatDoc};base64,${documentoo.content}`;
+            video.style.width = "100%";
+            video.style.height = "auto";
+            video.controls = true;
+
+            detailsBody.appendChild(video);
+        }
     } else {
         console.log("Elemento 'card-body-process' não encontrado");
     }
 }
 
 
+
 async function ShowEdit() {
-    
+
     const cardBody = document.getElementById("card-body-process");
 
     // Verifique se o elemento existe antes de tentar acessar suas propriedades
@@ -618,8 +634,40 @@ async function ShowEdit() {
     }
 }
 
-async function ShowUpload() {
-    
+async function ShowDispach() {
+
+    const cardBody = document.getElementById("card-body-process");
+
+    // Verifique se o elemento existe antes de tentar acessar suas propriedades
+    if (cardBody) {
+        let div = document.createElement('div');
+        div.setAttribute('id', 'editor');
+        div.setAttribute('class', 'form-control mt-3');
+
+        CKEDITOR.replace('editor');
+
+        // Adicione um ouvinte de evento para 'change'
+        CKEDITOR.instances.editor.on('change', function () {
+            // Verificar se o editor está vazio
+            if (this.getData().trim() === '') {
+                // Ocultar o botão "Salvar" se o editor estiver vazio
+                document.getElementById('saveButton').style.display = 'none';
+            } else {
+                // Mostrar o botão "Salvar" se o editor não estiver vazio
+                document.getElementById('saveButton').style.display = 'block';
+            }
+        });
+    } else {
+        console.log("Elemento 'editor' não encontrado");
+    }
+}
+
+async function ShowUpload(listClassDoc, key) {
+
+    listClassDoc = listClassDoc.split(",");
+
+    console.log(key)
+
     const cardBody = document.getElementById("card-body-process");
 
     // Verifique se o elemento existe antes de tentar acessar suas propriedades
@@ -628,19 +676,14 @@ async function ShowUpload() {
 
         let div = document.createElement('div');
 
-        div.innerHTML = `<div class="mb-3">
-                            <label for="formFile" class="form-label">CPF</label>
-                            <input class="form-control" type="file" id="formFile1">
-                        </div>
-                        <div class="mb-3">
-                            <label for="formFile" class="form-label">RG</label>
-                            <input class="form-control" type="file" id="formFile2">
-                        </div>
-                        <div class="mb-3">
-                            <label for="formFileMultiple" class="form-label">Outro</label>
-                            <input class="form-control" type="file" id="formFile3" multiple>
-                        </div>
-                        `
+        for (let i = 0; i < listClassDoc.length; i++) {
+            div.innerHTML += `<div class="mb-3">
+                            <label for="formFile" class="form-label">${listClassDoc[i]}</label>
+                            <input class="form-control" type="file" id="file${listClassDoc[i]}">
+                        </div>`
+        }
+
+        div.innerHTML += `<button type="button" class="btn btn-primary" onclick='SaveDocuments("${listClassDoc.join(",")}", "${key}")'>Enviar</button>`
 
         cardBody.appendChild(div);
     } else {
@@ -648,14 +691,45 @@ async function ShowUpload() {
     }
 }
 
+async function SaveDocuments(listClassDoc, _key) {
+    listClassDoc = listClassDoc.split(",");
+    let data = new FormData();
+    data.append('_key', _key);
+    data.append('type', 'doc');
+
+    for (let i = 0; i < listClassDoc.length; i++) {
+        console.log(listClassDoc[i])
+        if (document.getElementById(`file${listClassDoc[i]}`).files[0]) {
+            data.append('classDocument', `${listClassDoc[i]}`);
+            data.append('file', document.getElementById(`file${listClassDoc[i]}`).files[0]);
+
+            try {
+                let response = await fetch('http://localhost:3001/process/attach-documents', {
+                    method: 'POST',
+                    body: data
+                });
+
+                let responseData = await response.json();
+                console.log(responseData);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+    }
+
+}
+
+
 async function SaveDocumentation(_key) {
     let data = new FormData();
     data.append('_key', _key);
-    data.append('file', document.getElementById("formFile1").files[0]);
+    data.append('type', 'doc');
+    data.append('classDocument', 'CPF');
+    data.append('file', document.getElementById("fileCPF").files[0]);
 
     try {
         let response = await fetch('http://localhost:3001/process/attach-documents', {
-            method: 'PUT',
+            method: 'POST',
             body: data
         });
 
@@ -719,7 +793,7 @@ async function getDocument() {
 async function NextProcess(key) {
 
     const _key = key.toString()
-    
+
     const response = await fetch(`http://localhost:3001/process/next-tag/${_key}`, {
         method: 'PUT',
     });

@@ -89,8 +89,10 @@ export default class extends AbstractView {
 
                             <input type="radio" class="btn-check" name="btnradioaba" id="btnradioaba2" autocomplete="off" onclick="ShowEdit()">
                             <label class="btn btn-outline-primary" for="btnradioaba2">Edição</label>
-                            <input type="radio" class="btn-check" name="btnradioaba" id="btnradioaba3" autocomplete="off" onclick=" ShowUpload()">
+                            <input type="radio" class="btn-check" name="btnradioaba" id="btnradioaba3" autocomplete="off" onclick='ShowUpload("${this.doc.listClassDocument.join(",")}", "${this.doc._key}")'>
                             <label class="btn btn-outline-primary" for="btnradioaba3">Upload</label>
+                            <input type="radio" class="btn-check" name="btnradioaba" id="btnradioaba4" autocomplete="off" onclick=" ShowDispach()">
+                            <label class="btn btn-outline-primary" for="btnradioaba4">Despacho</label>
                         </div>
                         </div>
                     </div>
