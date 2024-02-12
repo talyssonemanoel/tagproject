@@ -1,3 +1,5 @@
+let listDocumentsToSign = [];
+
 async function saveService(_key, doc) {
     /*await save("/service",
         /*resp => {    
@@ -480,7 +482,7 @@ async function newIsenIPTU() {
 
 
 async function ShowTextarea() {
-    const textArea = document.getElementById("text-area");
+    //const textArea = document.getElementById("text-area");
 
     let div = document.createElement('div');
     div.setAttribute('id', 'editor');
@@ -505,25 +507,54 @@ async function ShowTextarea() {
 
 
 async function ShowIntegra(listPage) {
-
     listPage = listPage.split(",");
+    listDocumentsToSign.length = 0;
     const cardBody = document.getElementById("card-body-process");
 
-    console.log(listPage)
+    // Cria um novo array com a chave do documento e se ele está assinado ou não
+    const signedDocuments = await Promise.all(listPage.map(async (_key) => {
+        const response = await fetchData(`/document/getSignedDocument/${_key}`, "GET");
+        const isSigned = response.result // Converte a string 'true' ou 'false' para um booleano
+        return { _key, signed: isSigned };
+    }));
 
-    // Verifique se o elemento existe antes de tentar acessar suas propriedades
     if (cardBody) {
         cardBody.innerHTML = "";
 
         let div = document.createElement('div');
 
-        listPage.forEach((element, index) => {
+        signedDocuments.forEach((document, index) => {
             div.innerHTML += `
-                <div class="card">
-                    <div class="card-head">
-                        <input type="checkbox" class="btn-check" id="btncheck${index}" autocomplete="off" onchange="handleCheckboxChange(${index}, ${listPage.length})" value=${listPage[index]}>
-                        <label class="btn btn-outline-primary w-100" for="btncheck${index}">Página ${index + 1}</label>
-                    </div>
+                <div id="card${document._key}">
+                        <input type="checkbox" class="btn-check" id="btncheck${index}" autocomplete="off" onchange="handleCheckboxChange(${index})" value=${document._key}>
+                        <label class="btn btn-outline-primary w-100 d-flex justify-content-sm-between" for="btncheck${index}">
+                            <div class="esquerda">
+                                <div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
+                                    <button type="button" class="btn btn-info">P</button>
+                                    <button type="button" class="btn btn-info">${index + 1}</button>
+                                </div>
+                                ${document.signed ? '<button type="button" class="btn btn-warning btn-sm">Assinado</button>' : ''}
+                            </div>
+                            <div class="direita d-flex">
+                                ${!document.signed ? `
+                                <div class="dropdown ms-2 ">
+                                    <a class="btn btn-warning btn-sm" href="#" id="sign-this-button-${index}" style="display: none;" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Asssinar este documento
+                                    </a>
+
+                                    <div class="dropdown-menu" style="height: auto!important;">
+                                        <div class="input-group input-group-sm mb-3">
+                                            <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+                                            <button type="button" class="btn btn-primary" onClick="SignDoc(${document._key}, ${index})">ok</button>
+                                        </div>
+                                    </div>
+                                    </div>
+                                <button type="button" class="ms-2 btn btn-warning btn-sm" id="sign-button-${index}" style="display: none;">Assinar selecionados</button>
+                                <input type="checkbox" class="ms-2 btn-check" id="btn-check-${index}-outlined" autocomplete="off" onchange="handleSelectChange(${index})">
+                                <label class="ms-2 btn btn-light btn-sm" id="btn-label-${index}" for="btn-check-${index}-outlined">Selecionar</label>
+                                ` : ''}
+                            </div>
+                        </label>
                     <div id="details-page-${index}"></div>
                 </div>`;
         });
@@ -536,22 +567,121 @@ async function ShowIntegra(listPage) {
     }
 }
 
+async function SignDoc(_key, index) {
+
+    await fetchData(`/document/sign-doc/${_key}`, "PUT")
+
+    const response2 = await fetchData(`/document/getSignedDocument/${_key}`, "GET"); 
+    const isSigned = response2.result
+
+    console.log(isSigned)
+
+    var element = document.getElementById(`card${_key}`);
+    element.parentNode.removeChild(element);
+
+    let newDiv = document.createElement('div');
+
+    newDiv.innerHTML = `
+    <div id="card${_key}">
+            <input type="checkbox" class="btn-check" id="btncheck${index}" autocomplete="off" value=${_key}>
+            <label class="btn btn-outline-primary w-100 d-flex justify-content-sm-between" for="btncheck${index}">
+                <div class="esquerda">
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
+                        <button type="button" class="btn btn-info">P</button>
+                        <button type="button" class="btn btn-info">${index + 1}</button>
+                    </div>
+                    ${isSigned.signed ? '<button type="button" class="btn btn-warning btn-sm">Assinado</button>' : ''}
+                </div>
+                <div class="direita d-flex">
+                    ${!isSigned.signed ? `
+                    <div class="dropdown ms-2 ">
+                        <a class="btn btn-warning btn-sm" href="#" id="sign-this-button-${index}" style="display: none;" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Asssinar este documento
+                        </a>
+
+                        <div class="dropdown-menu" style="height: auto!important;">
+                            <div class="input-group input-group-sm mb-3">
+                                <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+                            </div>
+                        </div>
+                        </div>
+                    <button type="button" class="ms-2 btn btn-warning btn-sm" id="sign-button-${index}" style="display: none;">Assinar selecionados</button>
+                    <input type="checkbox" class="ms-2 btn-check" id="btn-check-${index}-outlined" autocomplete="off" onchange="handleSelectChange(${index})">
+                    <label class="ms-2 btn btn-light btn-sm" id="btn-label-${index}" for="btn-check-${index}-outlined">Selecionar</label>
+                    ` : ''}
+                </div>
+            </label>
+        <div id="details-page-${index-1}"></div>
+    </div>`;
+    let position = index-1;
+    let containerDiv = document.getElementById("card-body-process");
+    containerDiv.insertBefore(newDiv, containerDiv.children[position]);
+    
+}
+
+function handleSelectChange(index) {
+    const checkbox = document.getElementById(`btn-check-${index}-outlined`);
+    const label = document.getElementById(`btn-label-${index}`);
+    const signButton = document.getElementById(`sign-button-${index}`);
+    let _key
+    if (document.getElementById(`btncheck${index}`)) {
+        _key = document.getElementById(`btncheck${index}`).value;
+    }
+
+    if (checkbox.checked) {
+        label.textContent = 'Selecionado';
+        signButton.style.display = 'inline-block';
+        if (_key) {
+            listDocumentsToSign.push(_key);
+        }
+        console.log(listDocumentsToSign)
+    } else {
+        label.textContent = 'Selecionar';
+        signButton.style.display = 'none';
+        if (_key) {
+            listDocumentsToSign.splice(index, 1);
+        }
+        console.log(listDocumentsToSign)
+    }
+}
+
+function handleProcessSelectChange(index) {
+    const label = document.getElementById(`btn-label-${index}`);
+
+    if (label.textContent = 'Selecionar') {
+        label.textContent = 'Selecionado';
+    } else {
+        label.textContent = 'Selecionar';
+    }
+}
+
+function handleLabelClick(index) {
+    const label = document.getElementById(`btncheck${index}`);
+    const signThisButton = document.getElementById(`sign-this-button-${index}`);
+    if (label.classList.contains('active')) {
+        signThisButton.style.display = 'inline-block';
+    } else {
+        signThisButton.style.display = 'none';
+    }
+}
+
 async function handleCheckboxChange(index) {
     const checkbox = document.getElementById(`btncheck${index}`);
+    const signThisButton = document.getElementById(`sign-this-button-${index}`);
     if (checkbox.checked) {
         await ShowDetails(index);
+        signThisButton.style.display = 'inline-block';
     } else {
         const detailsBody = document.getElementById(`details-page-${index}`);
         if (detailsBody) {
-            detailsBody.innerHTML = "";  // Limpa o conteúdo quando a caixa de seleção é desmarcada
+            detailsBody.innerHTML = "";
+            signThisButton.style.display = 'none';  // Limpa o conteúdo quando a caixa de seleção é desmarcada
         }
     }
 }
 
 
 async function ShowDetails(index) {
-    console.log(index)
-
     const detailsBody = document.getElementById(`details-page-${index}`);
     const keyDoc = document.getElementById(`btncheck${index}`).value;
     const documentoo = await fetchData(`/document/${keyDoc}`, "GET")
@@ -559,43 +689,46 @@ async function ShowDetails(index) {
     if (detailsBody) {
         detailsBody.innerHTML = ""; // Limpe o conteúdo existente
 
-        if (documentoo.formatDoc === 'text/plain') {
-            // Se o documento for texto, exiba-o normalmente
+        if (documentoo.type === 'text') {
             detailsBody.innerHTML = `<div class="p-3 h-100 w-100">${documentoo.content}</div>`;
-        } else if (['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation'].includes(documentoo.formatDoc)) {
-            // Se o documento for um PDF, Word, Excel ou PowerPoint, crie um Blob e exiba-o em um elemento <embed>
-            let fileData = atob(documentoo.content);
-            let byteArray = new Uint8Array(fileData.length);
-            for (let i = 0; i < fileData.length; i++) {
-                byteArray[i] = fileData.charCodeAt(i);
+        } else if (documentoo.type === 'doc') {
+            if (documentoo.formatDoc === 'text/plain') {
+                detailsBody.innerHTML = `<div class="p-3 h-100 w-100">${documentoo.content}</div>`;
+            } else if (['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation'].includes(documentoo.formatDoc)) {
+                // Se o documento for um PDF, Word, Excel ou PowerPoint, crie um Blob e exiba-o em um elemento <embed>
+                let fileData = atob(documentoo.content);
+                let byteArray = new Uint8Array(fileData.length);
+                for (let i = 0; i < fileData.length; i++) {
+                    byteArray[i] = fileData.charCodeAt(i);
+                }
+                let blob = new Blob([byteArray.buffer], { type: documentoo.formatDoc });
+                let url = URL.createObjectURL(blob);
+
+                let embed = document.createElement('embed');
+                embed.src = url;
+                embed.type = documentoo.formatDoc;
+                embed.style.width = "100%";
+                embed.style.height = "100%";
+
+                detailsBody.appendChild(embed);
+            } else if (documentoo.formatDoc.startsWith('image/')) {
+                // Se o documento for uma imagem, exiba-a em um elemento <img>
+                let img = document.createElement('img');
+                img.src = `data:${documentoo.formatDoc};base64,${documentoo.content}`;
+                img.style.width = "100%";
+                img.style.height = "auto";
+
+                detailsBody.appendChild(img);
+            } else if (documentoo.formatDoc.startsWith('video/')) {
+                // Se o documento for um vídeo, exiba-o em um elemento <video>
+                let video = document.createElement('video');
+                video.src = `data:${documentoo.formatDoc};base64,${documentoo.content}`;
+                video.style.width = "100%";
+                video.style.height = "auto";
+                video.controls = true;
+
+                detailsBody.appendChild(video);
             }
-            let blob = new Blob([byteArray.buffer], { type: documentoo.formatDoc });
-            let url = URL.createObjectURL(blob);
-
-            let embed = document.createElement('embed');
-            embed.src = url;
-            embed.type = documentoo.formatDoc;
-            embed.style.width = "100%";
-            embed.style.height = "100%";
-
-            detailsBody.appendChild(embed);
-        } else if (documentoo.formatDoc.startsWith('image/')) {
-            // Se o documento for uma imagem, exiba-a em um elemento <img>
-            let img = document.createElement('img');
-            img.src = `data:${documentoo.formatDoc};base64,${documentoo.content}`;
-            img.style.width = "100%";
-            img.style.height = "auto";
-
-            detailsBody.appendChild(img);
-        } else if (documentoo.formatDoc.startsWith('video/')) {
-            // Se o documento for um vídeo, exiba-o em um elemento <video>
-            let video = document.createElement('video');
-            video.src = `data:${documentoo.formatDoc};base64,${documentoo.content}`;
-            video.style.width = "100%";
-            video.style.height = "auto";
-            video.controls = true;
-
-            detailsBody.appendChild(video);
         }
     } else {
         console.log("Elemento 'card-body-process' não encontrado");
@@ -614,39 +747,17 @@ async function ShowEdit() {
 
         let div = document.createElement('div');
 
-        div.innerHTML = `<div class="btn-group w-100" role="group" aria-label="Basic radio toggle button group">
-                            <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" onclick="ShowTextarea()">
-                            <label class="btn btn-outline-primary" for="btnradio1">Parecer</label>
-                        
-                            <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off" onclick="ShowTextarea()">
-                            <label class="btn btn-outline-primary" for="btnradio2">Decisão</label>
-                        
-                            <input type="radio" class="btn-check" name="btnradio" id="btnradio3" autocomplete="off" onclick="ShowTextarea()">
-                            <label class="btn btn-outline-primary" for="btnradio3">Despacho</label>
+        div.innerHTML = `<div class="d-flex justify-content-center mb-3">
+                            <div><h4><strong>Parecer</strong></h4></div>
                         </div>
                         <div id="editor" class="">
                         </div>
                         `
 
         cardBody.appendChild(div);
-    } else {
-        console.log("Elemento 'card-body-process' não encontrado");
-    }
-}
-
-async function ShowDispach() {
-
-    const cardBody = document.getElementById("card-body-process");
-
-    // Verifique se o elemento existe antes de tentar acessar suas propriedades
-    if (cardBody) {
-        let div = document.createElement('div');
-        div.setAttribute('id', 'editor');
-        div.setAttribute('class', 'form-control mt-3');
 
         CKEDITOR.replace('editor');
 
-        // Adicione um ouvinte de evento para 'change'
         CKEDITOR.instances.editor.on('change', function () {
             // Verificar se o editor está vazio
             if (this.getData().trim() === '') {
@@ -657,8 +768,48 @@ async function ShowDispach() {
                 document.getElementById('saveButton').style.display = 'block';
             }
         });
+
     } else {
-        console.log("Elemento 'editor' não encontrado");
+        console.log("Elemento 'card-body-process' não encontrado");
+    }
+}
+
+async function ShowDispach() {
+
+    const cardBody = document.getElementById("card-body-process");
+    const footer = document.getElementById("fter");
+
+    // Verifique se o elemento existe antes de tentar acessar suas propriedades
+    if (cardBody) {
+        cardBody.innerHTML = "";
+
+        let div = document.createElement('div');
+
+        div.innerHTML = `<div class="d-flex justify-content-center mb-3">
+                            <div><h4><strong>Despacho</strong></h4></div>
+                        </div>
+                        <div id="editor" class="">
+                        </div>
+                        `
+
+
+        cardBody.appendChild(div);
+
+        CKEDITOR.replace('editor');
+
+        CKEDITOR.instances.editor.on('change', function () {
+            // Verificar se o editor está vazio
+            if (this.getData().trim() === '') {
+                // Ocultar o botão "Salvar" se o editor estiver vazio
+                document.getElementById('saveButton').style.display = 'none';
+            } else {
+                // Mostrar o botão "Salvar" se o editor não estiver vazio
+                document.getElementById('saveButton').style.display = 'block';
+            }
+        });
+
+    } else {
+        console.log("Elemento 'card-body-process' não encontrado");
     }
 }
 

@@ -17,10 +17,7 @@ export default class extends AbstractView {
             tags: [],
         };
         this.currentPhaseView;
-        this.phaseKeys = ['attachmentPhase', 'opinionPhase', 'decisionPhase', 'implementationPhase']
-        
-        
-        
+        this.phaseKeys = ['attachmentPhase', 'opinionPhase', 'decisionPhase', 'implementationPhase']  
     }
 
     async getMenu() {
@@ -34,11 +31,11 @@ export default class extends AbstractView {
                     <a class="nav-link" href="/tag/list">Unidade Organizacional</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/process/list">Processos</a>
+                    <a class="nav-link" href="/tag/${this.params.tag_key}/process/list">Processos</a>
                 </li>`
         if (this.doc._key) {
             row += `<li class="nav-item">
-                        <a class="nav-link active" href="#">${this.doc.name}</a>
+                        <a class="nav-link active" href="#" style="background-color: #F8F8F8; border-bottom-color: #F8F8F8;">${this.doc.name}</a>
                     </li>`
         } else {
             row += `<li class="nav-item">
@@ -52,8 +49,9 @@ export default class extends AbstractView {
     }
 
     async init() {
-        if (this.params._key) {
-            this.doc = await fetchData(`/process/${this.params._key}`, "GET")
+        if (this.params.process_key) {
+            console.log(this.params.process_key)
+            this.doc = await fetchData(`/process/${this.params.process_key}`, "GET")
             this.currentPhaseView = this.doc.currentPhase;
             this.user = await fetchData(`/user/getUser`, "GET")
 
@@ -68,19 +66,9 @@ export default class extends AbstractView {
         row += `<input type="hidden" class="aof-input" id="_key" value=${this.doc._key}>`
         row += `<input type="hidden" class="aof-input" id="farm_key" value=}>`
 
-        row += `
-        <div class="card">            
-            `
-
-
         if (this.doc._key) {
             row += `
-            
-                <h3 class=" card-header h-100 d-flex justify-content-center">${this.doc.name}: ${this.doc._key}</h3>
-                <div class="card-body">
-            `
-            row += `
-                <div class="card mb-3">
+                <div class="card" style="border-top: none;">
                     <div class="card-header">
                         <div>
                         <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
@@ -88,7 +76,7 @@ export default class extends AbstractView {
                             <label class="btn btn-outline-primary" for="btnradioaba1">Integra</label>
 
                             <input type="radio" class="btn-check" name="btnradioaba" id="btnradioaba2" autocomplete="off" onclick="ShowEdit()">
-                            <label class="btn btn-outline-primary" for="btnradioaba2">Edição</label>
+                            <label class="btn btn-outline-primary" for="btnradioaba2">Parecer</label>
                             <input type="radio" class="btn-check" name="btnradioaba" id="btnradioaba3" autocomplete="off" onclick='ShowUpload("${this.doc.listClassDocument.join(",")}", "${this.doc._key}")'>
                             <label class="btn btn-outline-primary" for="btnradioaba3">Upload</label>
                             <input type="radio" class="btn-check" name="btnradioaba" id="btnradioaba4" autocomplete="off" onclick=" ShowDispach()">
@@ -99,28 +87,11 @@ export default class extends AbstractView {
                     <div id = "card-body-process" class="card-body">
                     </div>`
                     
-                    row += `<div class="card-footer">`
-                    row += `<button aof-view class="btn btn-primary btn-lg form-control submit" id="saveButton" onclick="SavePage()" style="display: none;">Salvar</button>
-
-                    `
-                    row += `</div>` 
-            row += `
-                </div>
-                
-            `      
-
-                    
-            row += `</div>`
-            row += `<div class="card-footer">`
-            row += `<button aof-view class="btn btn-primary btn-lg form-control submit" onclick="NextProcess(${this.doc._key})" >Próximo</button>`
-            row += `</div>`
-
-
-            setTimeout(async function() {
-                if(document.getElementById("card-body-process")){
-                    await ShowIntegra();
-                }
-            }, 0);
+                    /*row += `<div class="card-footer">
+                                <button aof-view class="btn btn-primary btn-lg form-control submit" id="saveButton" onclick="SavePage()" style="display: none;">Salvar</button>
+                            </div>`*/
+                row += `</div>`
+                setTimeout(() => ShowIntegra(this.doc.listPage.join(",")), 0);     
         } else {
             row +=
                 `<div class="card-body">
@@ -230,9 +201,6 @@ export default class extends AbstractView {
             row += `
             </div>
             <div class="card-footer">`
-            if (this.user.cargo === "attachmentPhase") {
-                row += `<button aof-view class="btn btn-primary btn-lg form-control submit" onclick="saveStockInput()" >Editar</button>`
-            }
             row += ` </div>
         </div>`
             //row += `<img onload='updateStockInputForm(${JSON.stringify(this.doc)})' src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==' >`

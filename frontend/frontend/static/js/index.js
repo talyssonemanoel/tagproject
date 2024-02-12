@@ -49,7 +49,7 @@ const router = async () => {
 
         { path: "/process/list", view: ListProcess },
         { path: "/process/new", view: Process },
-        { path: "/process/:_key", view: Process },
+        { path: "/tag/:tag_key/process/:process_key", view: Process },
 
         { path: "/process/:_key/attachmentPhase", view: EditAttachmentPhase },
         { path: "/process/:_key/opinionPhase", view: EditOpinionPhase },

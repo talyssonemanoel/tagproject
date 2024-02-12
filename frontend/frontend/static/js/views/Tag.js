@@ -5,7 +5,7 @@ export default class extends AbstractView {
     
     constructor(params) {
         super(params);
-        this.setTitle("Tag");
+        this.setTitle("Unidade Organizacional");
 
         this.doc = {
             _key: "",
@@ -36,11 +36,11 @@ export default class extends AbstractView {
                     <a class="nav-link" href="/">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/tag/list">Tags</a>
+                    <a class="nav-link" href="/tag/list">Unidades Organizacionais</a>
                 </li>`
         if(this.doc._key) {
         row += `<li class="nav-item">
-                    <a class="nav-link active" href="#">${this.doc.name}</a>
+                    <a class="nav-link active" href="#" style="background-color: #F8F8F8; border-bottom-color: #F8F8F8;">${this.doc.name}</a>
                 </li>`
         } else {
         row += `<li class="nav-item">
@@ -122,7 +122,7 @@ export default class extends AbstractView {
     
         // Adicionar as opções das tags superiores ao menu abaixo da card-header
         row += `
-        <div class="card">
+        <div class="card" style="border-top: none;">
             <div class="card-header pb-0 border-0"> 
                 <ul class="nav nav-tabs justify-content-center">
         `

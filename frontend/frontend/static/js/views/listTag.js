@@ -3,7 +3,7 @@ import AbstractView from "./AbstractView.js";
 export default class extends AbstractView {
     constructor(params) {
         super(params);
-        this.setTitle("Tags");
+        this.setTitle("Unidades Organizacionais");
         
     }
 
@@ -11,7 +11,7 @@ export default class extends AbstractView {
         
         let row = `
         
-            <div class="card">
+            <div class="card" style="border-top: none;">
                 <div class="card-header">
                 </div>                
                 <div class="card-body">`
@@ -41,7 +41,7 @@ export default class extends AbstractView {
                     <a class="nav-link" href="/">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link active" href="/tag/list">Tags</a>
+                    <a class="nav-link active" href="/tag/list" style="background-color: #F8F8F8; border-bottom-color: #F8F8F8;">Unidades Organizacionais</a>
                 </li>
             </ul>
             `
