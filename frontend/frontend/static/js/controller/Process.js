@@ -583,17 +583,17 @@ async function SignDoc(_key, index) {
 
     newDiv.innerHTML = `
     <div id="card${_key}">
-            <input type="checkbox" class="btn-check" id="btncheck${index}" autocomplete="off" value=${_key}>
+            <input type="checkbox" class="btn-check" id="btncheck${index}" autocomplete="off" onchange="handleCheckboxChange(${index})" value=${_key}>
             <label class="btn btn-outline-primary w-100 d-flex justify-content-sm-between" for="btncheck${index}">
                 <div class="esquerda">
                     <div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
                         <button type="button" class="btn btn-info">P</button>
                         <button type="button" class="btn btn-info">${index + 1}</button>
                     </div>
-                    ${isSigned.signed ? '<button type="button" class="btn btn-warning btn-sm">Assinado</button>' : ''}
+                    ${response2.result.signed ? '<button type="button" class="btn btn-warning btn-sm">Assinado</button>' : ''}
                 </div>
                 <div class="direita d-flex">
-                    ${!isSigned.signed ? `
+                    ${!response2.result.signed ? `
                     <div class="dropdown ms-2 ">
                         <a class="btn btn-warning btn-sm" href="#" id="sign-this-button-${index}" style="display: none;" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Asssinar este documento
@@ -611,9 +611,9 @@ async function SignDoc(_key, index) {
                     ` : ''}
                 </div>
             </label>
-        <div id="details-page-${index-1}"></div>
+        <div id="details-page-${index}"></div>
     </div>`;
-    let position = index-1;
+    let position = index;
     let containerDiv = document.getElementById("card-body-process");
     containerDiv.insertBefore(newDiv, containerDiv.children[position]);
     
@@ -685,6 +685,9 @@ async function ShowDetails(index) {
     const detailsBody = document.getElementById(`details-page-${index}`);
     const keyDoc = document.getElementById(`btncheck${index}`).value;
     const documentoo = await fetchData(`/document/${keyDoc}`, "GET")
+
+    console.log(index)
+    console.log(keyDoc)
 
     if (detailsBody) {
         detailsBody.innerHTML = ""; // Limpe o conteúdo existente
