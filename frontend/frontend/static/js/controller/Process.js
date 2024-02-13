@@ -574,7 +574,7 @@ async function SignDoc(_key, index) {
     const response2 = await fetchData(`/document/getSignedDocument/${_key}`, "GET"); 
     const isSigned = response2.result
 
-    console.log(isSigned)
+    console.log(response2.result)
 
     var element = document.getElementById(`card${_key}`);
     element.parentNode.removeChild(element);
@@ -590,10 +590,10 @@ async function SignDoc(_key, index) {
                         <button type="button" class="btn btn-info">P</button>
                         <button type="button" class="btn btn-info">${index + 1}</button>
                     </div>
-                    ${response2.result.signed ? '<button type="button" class="btn btn-warning btn-sm">Assinado</button>' : ''}
+                    ${response2.result ? '<button type="button" class="btn btn-warning btn-sm">Assinado</button>' : ''}
                 </div>
                 <div class="direita d-flex">
-                    ${!response2.result.signed ? `
+                    ${!response2.result ? `
                     <div class="dropdown ms-2 ">
                         <a class="btn btn-warning btn-sm" href="#" id="sign-this-button-${index}" style="display: none;" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Asssinar este documento
@@ -685,9 +685,6 @@ async function ShowDetails(index) {
     const detailsBody = document.getElementById(`details-page-${index}`);
     const keyDoc = document.getElementById(`btncheck${index}`).value;
     const documentoo = await fetchData(`/document/${keyDoc}`, "GET")
-
-    console.log(index)
-    console.log(keyDoc)
 
     if (detailsBody) {
         detailsBody.innerHTML = ""; // Limpe o conteúdo existente
